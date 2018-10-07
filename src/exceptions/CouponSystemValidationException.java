@@ -1,3 +1,4 @@
+
 package exceptions;
 
 public class CouponSystemValidationException extends CouponSystemException {

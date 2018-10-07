@@ -1,3 +1,4 @@
+
 package core;
 
 import dao.ConnectionPool;
@@ -13,7 +14,6 @@ public class CouponSystem {
 	
 	private static CouponSystem instance;
 	private Thread dailyTask;
-	
 	
 	
 	private CouponSystem() {

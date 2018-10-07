@@ -1,3 +1,4 @@
+
 package core;
 
 import java.sql.Timestamp;
@@ -19,6 +20,11 @@ public class DailyCouponExpirationTask implements Runnable {
 		couponDAO = new CouponDBDAO();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
+	
 	@Override
 	public void run(){
 		while(true) {

@@ -1,3 +1,4 @@
+
 package dao;
 
 import java.sql.Connection;
@@ -24,7 +25,6 @@ public class CompanyDBDAO implements CompanyDAO {
 	public CompanyDBDAO() {
 		cp = ConnectionPool.getInstance();
 	}
-	
 	
 	@Override
 	public long createCompany(Company company) throws CouponSystemException, EntityAlreadyExistsException, NonUniqueDataException, CouponSystemException {
