@@ -1,4 +1,3 @@
-
 package dao;
 
 
@@ -20,21 +19,22 @@ public class ConnectionPool {
 
     static final int MAX_CONNECTIONS = 10;
 
-    private final String db = "jdbc:ucanaccess://";
+    private final String db = "jdbc:mysql://";
     
 
     private ConnectionPool(){
     	Path pathToDB = Paths.get(FileSystems.getDefault().getPath("").toAbsolutePath().toString(), "cmsj.mdb");
     	System.out.println("Path to DB validation: " + pathToDB);
     	try {
-			Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+			Class.forName("com.mysql.cj.jdbc.Driver");
 		} catch (ClassNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
         for (int i = 0; i < MAX_CONNECTIONS; i++){
             try{
-                Connection connection = DriverManager.getConnection(db + pathToDB + ";memory=true");
+                Connection connection = DriverManager.getConnection(db + "localhost:3306/coupon_system_database?useLegacyDatetimeCode=false&serverTimezone=UTC", "root", "mysql");
+                connection.setAutoCommit(false);
                 connections.add(connection);
             }
             catch (SQLException e){

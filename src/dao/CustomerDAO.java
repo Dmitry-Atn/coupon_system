@@ -1,4 +1,3 @@
-
 package dao;
 
 import java.util.Collection;
@@ -30,5 +29,6 @@ public interface CustomerDAO {
 
 	public long getCustomerIdByName(String string) throws EntityNotExistException, CouponSystemException;
 	
+	public Collection<Coupon> getPurchaseHistory(long customerId);
 	
 }

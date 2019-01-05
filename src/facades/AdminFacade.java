@@ -1,4 +1,3 @@
-
 package facades;
 
 import java.util.Collection;
@@ -72,6 +71,7 @@ public class AdminFacade implements CouponClientFacade {
 	}
 	
 	public void removeCustomer(long customerId) throws EntityNotExistException, EntityInactiveException, CouponSystemException {
+		
 		customerDAO.removeCustomer(customerId);
 	}
 	
@@ -87,7 +87,5 @@ public class AdminFacade implements CouponClientFacade {
 	public Collection<Customer> getAllCustomers() throws CouponSystemException{
 		return customerDAO.getAllCustomers();
 	}
-	
-	
-	
+			
 }

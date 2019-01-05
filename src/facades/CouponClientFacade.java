@@ -1,4 +1,3 @@
-
 package facades;
 
 import exceptions.CouponSystemException;

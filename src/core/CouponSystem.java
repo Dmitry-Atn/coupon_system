@@ -1,4 +1,3 @@
-
 package core;
 
 import dao.ConnectionPool;
@@ -43,7 +42,6 @@ public class CouponSystem {
 		} else {
 			throw new ClientTypeException("Access denied. This client type has no permissions.");
 		}
-		
 	}
 	
 	public void shutDown() {

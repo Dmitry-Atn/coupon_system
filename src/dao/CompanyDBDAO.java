@@ -1,4 +1,3 @@
-
 package dao;
 
 import java.sql.Connection;
@@ -281,8 +280,8 @@ public class CompanyDBDAO implements CompanyDAO {
 			PreparedStatement st = connection.prepareStatement(query);
 			st.setString(1, companyName);
 			ResultSet rs = st.executeQuery();
-			st.close();
 			if (!rs.next()) {
+				st.close();
 				throw new EntityNotExistException("Company name: " + companyName + " not exist in DB");
 			} else {
 				return rs.getLong("company_id");
@@ -295,7 +294,7 @@ public class CompanyDBDAO implements CompanyDAO {
 	public void clearDB() throws CouponSystemException{
 		Connection connection = cp.getConnection();
 		try {
-			String query = "DELETE * FROM company;";
+			String query = "DELETE FROM company WHERE 1=1;";
 			Statement st = connection.createStatement();
 			st.execute(query);
 			st.close();

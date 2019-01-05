@@ -1,4 +1,3 @@
-
 package dao;
 
 import java.util.Collection;
@@ -25,5 +24,7 @@ public interface CompanyDAO {
 	public Collection<Coupon> getCoupons(long companyId) throws EntityNotExistException, CouponSystemException;
 
 	public boolean login(String companyEmail, String password) throws CouponSystemException;
+
+	public void clearDB() throws CouponSystemException;
 	
 }

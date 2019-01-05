@@ -1,4 +1,3 @@
-
 package dao;
 
 import java.sql.Connection;
@@ -272,15 +271,26 @@ public class CustomerDBDAO implements CustomerDAO {
 	public void clearDB() throws CouponSystemException{
 		Connection connection = cp.getConnection();
 		try {
-			String query = "DELETE * FROM customer;";
+			String query = "DELETE FROM customer WHERE 1=1;";
 			Statement st = connection.createStatement();
 			st.execute(query);
 			st.close();
 			connection.commit();
-		} catch (SQLException e) {
-			throw new CouponSystemException("Somthing went wrong during clean-up of 'customer' table");
+		} catch (SQLException e) { 
+			throw new CouponSystemException("Somthing went wrong during clean-up of 'customer' table" + e);
+		} finally {
+			if (connection != null) {
+				cp.returnConnection(connection);
+			}
+			
 		}
-		cp.returnConnection(connection);
+		
+	}
+
+	@Override
+	public Collection<Coupon> getPurchaseHistory(long customerId) {
+		// TODO: implement getPurchaseHistory
+		return null;
 	}
 
 }

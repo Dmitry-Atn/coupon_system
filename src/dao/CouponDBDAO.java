@@ -1,4 +1,3 @@
-
 package dao;
 
 import exceptions.*;
@@ -108,6 +107,68 @@ public class CouponDBDAO implements CouponDAO {
 		}
 
 	}
+	
+	@Override
+	public void assignCoupon(long couponId, long customerId) throws CouponSystemException {
+		
+		Connection connection = cp.getConnection();
+		try {
+			ResultSet rs = selectCouponById(couponId, connection);
+			//if there are no any coupon with such ID in db
+			if  ( !rs.next() ) {
+				throw new EntityNotExistException("Coupon id :" + couponId + " not exist");
+			} else if (rs.getInt("status") == 3){
+				//if the coupon has status 3 - deleted 
+				throw new EntityInactiveException("Coupon id :" + couponId + " is unable to be purchased or it has been deleted!");
+			} else if (rs.getInt("amount") == 0){
+				//ifrequested coupons sold out
+				throw new CouponSoldOutException("Coupon id :" + couponId + " is sold out.");
+			} else {
+				int coupon_amount = rs.getInt("amount");
+				//check if coupon already purchased
+				String query = "SELECT * FROM customer_inventory WHERE coupon_id = ? AND customer_id = ?;";
+				PreparedStatement st = connection.prepareStatement(query);
+				st.setLong(1, couponId);
+				st.setLong(2, customerId);
+				rs = st.executeQuery();
+				if (rs.next()) {
+					throw new DuplicatedPurchaseException("Coupon id :" + couponId + " already purchased by customer " + customerId);
+				} else {
+					//add coupon to customer
+					try {
+						query = "INSERT INTO customer_inventory (customer_id, coupon_id, status) VALUES (?,?,0);";
+						st = connection.prepareStatement(query);
+						st.setLong(1, customerId);
+						st.setLong(2, couponId);					
+						st.execute();
+					} catch (SQLException sqlexception) {
+						throw new CustomerInventoryException("Exception occured during adding coupon " + couponId + " to customer " + customerId);
+					}								
+					//decrease number of coupons
+					try {
+						query = "UPDATE coupon SET amount = ?;";
+						st = connection.prepareStatement(query);
+						st.setLong(1, (coupon_amount - 1));				
+						st.execute();
+					} catch (SQLException sqlexception) {
+						throw new CustomerInventoryException("Exception occured during updating coupon " + couponId + " amount to " + (coupon_amount - 1));
+					}
+					
+				}
+				st.close();
+			}
+			connection.commit();
+		}
+		catch (SQLException e){
+			throw new CouponSystemException(e);
+		} finally {
+			cp.returnConnection(connection);
+		}
+
+	}
+	
+	
+	
 	
 	
 	// method for updating coupon
@@ -236,6 +297,119 @@ public class CouponDBDAO implements CouponDAO {
 		}
 		return allCoupons;
 	}
+	
+	//get all Coupons of company
+	@Override
+	public Collection<Coupon> getCouponsByCompany(long companyId) throws CouponSystemException {
+		Collection<Coupon> allCoupons = new ArrayList<Coupon>();
+		Connection connection = cp.getConnection();
+		try {
+			String query = "SELECT * FROM coupon WHERE status <> 3 AND company_id=?;";
+			PreparedStatement statement = connection.prepareStatement(query);
+			statement.setString(1, Long.toString(companyId));
+			ResultSet result = statement.executeQuery();
+			Coupon coupon = null;
+			while (result.next()) {
+				coupon = new Coupon();
+				coupon.setCouponID(result.getLong("couponID"));
+				coupon.setTitle(result.getString("title"));
+				coupon.setCouponStartDate(result.getDate("start_date"));
+				coupon.setCouponEndtDate(result.getDate("end_date"));
+				coupon.setAmount(result.getInt("amount"));
+				coupon.setCouponType(CouponType.valueOf(result.getString("type")));
+				coupon.setDescription(result.getString("description"));
+				coupon.setCouponPrice(result.getDouble("price"));
+				coupon.setImage(result.getString("image"));
+				coupon.setCompanyId(result.getLong("company_id"));
+				// add to list
+				allCoupons.add(coupon);
+			}
+			statement.close();
+
+		} catch (SQLException e) {
+			throw new CouponSystemException(e);
+		} finally {
+			cp.returnConnection(connection);
+		}
+		return allCoupons;
+	}
+	
+	
+	//get all Coupons of company by type
+	@Override
+	public Collection<Coupon> getCouponsByCompanyAndType(long companyId, CouponType couponType) throws CouponSystemException {
+		Collection<Coupon> allCoupons = new ArrayList<Coupon>();
+		Connection connection = cp.getConnection();
+		try {
+			String query = "SELECT * FROM coupon WHERE status <> 3 AND company_id=? AND type=?;";
+			PreparedStatement statement = connection.prepareStatement(query);
+			statement.setString(1, Long.toString(companyId));
+			statement.setString(2, couponType.toString());
+			ResultSet result = statement.executeQuery();
+			Coupon coupon = null;
+			while (result.next()) {
+				coupon = new Coupon();
+				coupon.setCouponID(result.getLong("couponID"));
+				coupon.setTitle(result.getString("title"));
+				coupon.setCouponStartDate(result.getDate("start_date"));
+				coupon.setCouponEndtDate(result.getDate("end_date"));
+				coupon.setAmount(result.getInt("amount"));
+				coupon.setCouponType(CouponType.valueOf(result.getString("type")));
+				coupon.setDescription(result.getString("description"));
+				coupon.setCouponPrice(result.getDouble("price"));
+				coupon.setImage(result.getString("image"));
+				coupon.setCompanyId(result.getLong("company_id"));
+				// add to list
+				allCoupons.add(coupon);
+			}
+			statement.close();
+
+		} catch (SQLException e) {
+			throw new CouponSystemException(e);
+		} finally {
+			cp.returnConnection(connection);
+		}
+		return allCoupons;
+	}
+	
+	
+	//get all Coupons of company up to specified price
+		@Override
+		public Collection<Coupon> getCouponsBeforeDate(long companyId, Date date) throws CouponSystemException {
+			Collection<Coupon> allCoupons = new ArrayList<Coupon>();
+			Connection connection = cp.getConnection();
+			try {
+				String query = "SELECT * FROM coupon WHERE status <> 3 AND company_id=? AND end_date <= ?;";
+				PreparedStatement statement = connection.prepareStatement(query);
+				statement.setString(1, Long.toString(companyId));
+				statement.setString(2, date.toString());
+				ResultSet result = statement.executeQuery();
+				Coupon coupon = null;
+				while (result.next()) {
+					coupon = new Coupon();
+					coupon.setCouponID(result.getLong("couponID"));
+					coupon.setTitle(result.getString("title"));
+					coupon.setCouponStartDate(result.getDate("start_date"));
+					coupon.setCouponEndtDate(result.getDate("end_date"));
+					coupon.setAmount(result.getInt("amount"));
+					coupon.setCouponType(CouponType.valueOf(result.getString("type")));
+					coupon.setDescription(result.getString("description"));
+					coupon.setCouponPrice(result.getDouble("price"));
+					coupon.setImage(result.getString("image"));
+					coupon.setCompanyId(result.getLong("company_id"));
+					// add to list
+					allCoupons.add(coupon);
+				}
+				statement.close();
+
+			} catch (SQLException e) {
+				throw new CouponSystemException(e);
+			} finally {
+				cp.returnConnection(connection);
+			}
+			return allCoupons;
+		}
+		
 
 	// method to get all coupons of the same type from DB
 	// return a collection of coupons of the requested type
@@ -244,7 +418,6 @@ public class CouponDBDAO implements CouponDAO {
 		// constructing a List<Coupon> to return
 		Collection<Coupon> allCouponsByType = new ArrayList<Coupon>();
 		Connection connection = cp.getConnection();
-
 		try {
 			String query = "SELECT * FROM coupon WHERE type=?";
 			PreparedStatement statement = connection.prepareStatement(query);
@@ -329,6 +502,42 @@ public class CouponDBDAO implements CouponDAO {
 		ResultSet rs = st.executeQuery();
 		st.close();
 		return rs;
+	}
+
+	@Override
+	public Collection<Coupon> getCouponsUpToPrice(long companyId, int price) throws CouponSystemException {
+		Collection<Coupon> allCoupons = new ArrayList<Coupon>();
+		Connection connection = cp.getConnection();
+		try {
+			String query = "SELECT * FROM coupon WHERE status <> 3 AND company_id=? AND price <= ?;";
+			PreparedStatement statement = connection.prepareStatement(query);
+			statement.setString(1, Long.toString(companyId));
+			statement.setString(2, Integer.toString(price));
+			ResultSet result = statement.executeQuery();
+			Coupon coupon = null;
+			while (result.next()) {
+				coupon = new Coupon();
+				coupon.setCouponID(result.getLong("couponID"));
+				coupon.setTitle(result.getString("title"));
+				coupon.setCouponStartDate(result.getDate("start_date"));
+				coupon.setCouponEndtDate(result.getDate("end_date"));
+				coupon.setAmount(result.getInt("amount"));
+				coupon.setCouponType(CouponType.valueOf(result.getString("type")));
+				coupon.setDescription(result.getString("description"));
+				coupon.setCouponPrice(result.getDouble("price"));
+				coupon.setImage(result.getString("image"));
+				coupon.setCompanyId(result.getLong("company_id"));
+				// add to list
+				allCoupons.add(coupon);
+			}
+			statement.close();
+
+		} catch (SQLException e) {
+			throw new CouponSystemException(e);
+		} finally {
+			cp.returnConnection(connection);
+		}
+		return allCoupons;
 	}
 
 }

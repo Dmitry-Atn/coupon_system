@@ -1,4 +1,3 @@
-
 package entities;
 
 public enum CouponType {

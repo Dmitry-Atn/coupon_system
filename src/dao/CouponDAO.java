@@ -1,4 +1,3 @@
-
 package dao;
 
 import java.sql.Date;
@@ -14,6 +13,7 @@ public interface CouponDAO {
 
 	// throw exceptions by void type
 
+	
 	public long createCoupon(Coupon coupon) throws CouponSystemException, EntityAlreadyExistsException;
 
 	public void removeCoupon(long id) throws CouponSystemException;
@@ -27,5 +27,15 @@ public interface CouponDAO {
 	public Collection<Coupon> getCouponsByType(CouponType couponType) throws CouponSystemException;
 
 	public Collection<Coupon> getOldCoupons() throws CouponSystemException;
+	
+	public Collection<Coupon> getCouponsByCompany(long companyId) throws CouponSystemException;
+
+	public Collection<Coupon> getCouponsByCompanyAndType(long companyId, CouponType couponType) throws CouponSystemException;
+
+	public Collection<Coupon> getCouponsUpToPrice(long companyId, int price) throws CouponSystemException;
+
+	public Collection<Coupon> getCouponsBeforeDate(long companyId, Date date) throws CouponSystemException;
+	
+	public void assignCoupon(long couponId, long customerId) throws CouponSystemException;
 
 }

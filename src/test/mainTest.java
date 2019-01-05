@@ -1,4 +1,3 @@
-
 package test;
 import java.sql.Connection;
 import java.util.Collection;
@@ -17,12 +16,10 @@ import exceptions.EntityNotExistException;
 import exceptions.NonUniqueDataException;
 
 public class mainTest {
-	private static CompanyDAO companyDbdao;
-	private static CustomerDAO customerDbdao;
+	public static CompanyDAO companyDbdao = new CompanyDBDAO();
+	public static CustomerDAO customerDbdao = new CustomerDBDAO();
 	
     public static void runTest(){
-    	companyDbdao = new CompanyDBDAO();
-    	customerDbdao = new CustomerDBDAO();
     	TestConnectionPool();
         createCompanyTest();
         removeCompanyTest();
@@ -65,7 +62,7 @@ public class mainTest {
     		System.out.println("Unexpected CouponSystemException");
     		res = false;
     	}
-    	try {
+    	try {	
     		companyDbdao.createCompany(new Company("Duplicated EMail Company","123","13@asd.zxc"));
     		res = false;
     		System.out.println("nonunique company email available");

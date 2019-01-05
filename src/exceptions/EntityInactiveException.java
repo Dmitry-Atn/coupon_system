@@ -1,4 +1,3 @@
-
 package exceptions;
 
 public class EntityInactiveException extends CouponSystemException {
